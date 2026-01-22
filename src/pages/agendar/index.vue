@@ -13,7 +13,7 @@
       height="50"
       color="white"
     >
-      <v-card-subtitle class="pa-4" style="font-size: 16px; font-family: Inter;">
+    <v-card-subtitle class="pa-4" style="font-size: 16px; font-family: Inter;">
         Janeiro
       </v-card-subtitle>
 
@@ -94,13 +94,13 @@
       flat tile
       rounded="0"
       height="600"
-      color="#f0f0f0"
+      color="#d0d0d0"
       style="overflow: auto;"
     >
       <v-item-group
         multiple
         v-model="horaSelected"
-        class="px-2 py-2 d-flex flex-column scroll-y"
+        class="px-2 py-2 mb-16 d-flex flex-column scroll-y"
       >
         <v-item
           v-for="hora in horarios"
@@ -112,7 +112,7 @@
             height="60"
             flat
             class="mx-1 my-2 d-flex justify-center align-center"
-            :color="isSelected ? 'primary' : 'white'"
+            :color="isSelected ? 'primary' : hora.disabled ? 'grey' : 'white'"
             style="font-family: Inter;"
           >
             {{ hora.hora }}
@@ -152,12 +152,12 @@
         {hora: "10h - 11h",filtro: "10"},
         {hora: "11h - 12h",filtro: "11"},
         {hora: "13h - 14h",filtro: "13"},
-        {hora: "14h - 15h",filtro: "14"},
-        {hora: "15h - 16h",filtro: "15"},
+        {hora: "14h - 15h",filtro: "14", disabled: true},
+        {hora: "15h - 16h",filtro: "15", disabled: true},
         {hora: "16h - 17h",filtro: "16"},
-        {hora: "17h - 18h",filtro: "17"},
-        {hora: "18h - 19h",filtro: "18"},
-        {hora: "19h - 20h",filtro: "19"},
+        {hora: "17h - 18h",filtro: "17", disabled: true},
+        {hora: "18h - 19h",filtro: "18", disabled: true},
+        {hora: "19h - 20h",filtro: "19", disabled: true},
         {hora: "20h - 21h",filtro: "20"},
         {hora: "21h - 22h",filtro: "21"},
         {hora: "22h - 23h",filtro: "22"},
