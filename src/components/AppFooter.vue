@@ -1,52 +1,46 @@
 <template>
-  <v-footer
-    app
-    height="40"
-  >
-    <a
-      v-for="item in items"
-      :key="item.title"
-      class="d-inline-block mx-2 social-link"
-      :href="item.href"
-      rel="noopener noreferrer"
-      target="_blank"
-      :title="item.title"
-    >
-      <v-icon
-        :icon="item.icon"
-        :size="item.icon === '$vuetify' ? 24 : 16"
-      />
-    </a>
+  <transition name="slide-up">
+  <v-card v-if="appStore.totalSelecionados" class="footer" style="color: #616161;">
+    <div class="d-flex justify-space-between"><span>Horários selecionados</span> <span>{{ appStore.totalSelecionados }}</span></div>
+    <v-divider class="my-2"></v-divider>
+    <div class="d-flex justify-space-between mb-1" ><h3>Total</h3> <span>R$ {{ appStore.totalSelecionados * 100 }}</span></div>
+    <v-card-actions class="d-flex justify-space-around">
+      <v-btn variant="outlined">Limpar horários</v-btn> 
+      <v-btn variant="flat" color="primary">Pagamento</v-btn> 
+    </v-card-actions>
+  </v-card>
+</transition>
 
-  </v-footer>
 </template>
 
 <script setup>
-  const items = [
-    {
-      title: 'Vuetify Documentation',
-      icon: `$vuetify`,
-      href: 'https://vuetifyjs.com/',
-    },
-    {
-      title: 'Vuetify Support',
-      icon: 'mdi-shield-star-outline',
-      href: 'https://support.vuetifyjs.com/',
-    },
-    {
-      title: 'Vuetify X',
-      icon: ['M2.04875 3.00002L9.77052 13.3248L1.99998 21.7192H3.74882L10.5519 14.3697L16.0486 21.7192H22L13.8437 10.8137L21.0765 3.00002H19.3277L13.0624 9.76874L8.0001 3.00002H2.04875ZM4.62054 4.28821H7.35461L19.4278 20.4308H16.6937L4.62054 4.28821Z'],
-      href: 'https://x.com/vuetifyjs',
-    },
-  ]
+import { useAppStore } from '@/stores/app';
+
+const appStore = useAppStore()
 </script>
 
-<style scoped lang="sass">
-  .social-link :deep(.v-icon)
-    color: rgba(var(--v-theme-on-background), var(--v-disabled-opacity))
-    text-decoration: none
-    transition: .2s ease-in-out
+<style scoped lang="scss">
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 150px;
+  background: rgb(243, 243, 243);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.199);
+  padding: 16px;
+  z-index: 1000;
+}
 
-    &:hover
-      color: rgba(25, 118, 210, 1)
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform .25s ease, opacity .25s;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
 </style>

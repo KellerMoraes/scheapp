@@ -1,5 +1,5 @@
 <template>
-  <v-app style="overflow-x: hidden;">
+  <v-app>
     <router-view />
   </v-app>
 </template>

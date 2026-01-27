@@ -1,61 +1,64 @@
 <template>
   <v-container
-    class="px-0 pt-0 d-flex flex-column"
+    class="px-0 py-0 d-flex flex-column"
     max-width="900"
-    style="height: 100%;"
   >
 
     <!-- HEADER -->
-    <v-card
-      class="d-flex justify-space-between"
-      flat
-      tile
-      height="50"
-      color="white"
-    >
-    <v-card-subtitle class="pa-4" style="font-size: 16px; font-family: Inter;">
-        Janeiro
-      </v-card-subtitle>
-
-      <v-card-subtitle class="pa-4" style="color: #5B8BD3;">
-        Mais datas
-      </v-card-subtitle>
-    </v-card>
-
-    <!-- DATAS (SCROLL HORIZONTAL) -->
-    <v-card flat height="74" color="white" tile>
-      <v-item-group
-        mandatory
-        v-model="dateSelected"
-        class="px-2 py-3 d-flex scroll-x"
+      <v-card
+        class="d-flex justify-space-between"
+        flat
+        tile
+        height="50"
+        color="white"
       >
-        <v-item
-          v-for="data in datas"
-          :key="data.dia"
-          v-slot="{ isSelected, toggle }"
+      <v-card-subtitle class="pa-4" style="font-size: 16px; font-family: Inter;">
+          {{ mesAtual }}
+        </v-card-subtitle>
+
+        <v-card-subtitle class="pa-4" style="color: #5B8BD3;">
+          Mais datas
+        </v-card-subtitle>
+      </v-card>
+
+      <!-- DATAS (SCROLL HORIZONTAL) -->
+      <v-card flat height="74" color="white" tile>
+        <v-item-group
+          mandatory
+          v-model="dateSelected"
+           ref="scrollContainer"
+  class="px-2 py-3 d-flex scroll-x"
+  @scroll="atualizarMesVisivel"
         >
-          <v-card
-            @click="toggle"
-            width="50"
-            height="50"
-            flat
-            rounded="xl"
-            class="mx-1 d-flex flex-column justify-center align-center flex-shrink-0"
-            :color="isSelected ? 'primary' : 'white'"
-            style="font-family: Inter;"
+          <v-item
+            v-for="data in datas"
+            :key="data.dia"
+            v-slot="{ isSelected, toggle }"
           >
-            <span
-              class="text-center"
-              style="line-height: 100%;"
-              :style="{ color: isSelected ? 'white' : '#464646' }"
+            <v-card
+              @click="()=>{toggle(), mudarDia(data)}"
+              width="50"
+              height="50"
+              flat
+              :data-month="data.mes"
+              rounded="xl"
+              ref="cards"
+              class="mx-1 d-flex flex-column justify-center align-center flex-shrink-0"
+              :color="isSelected ? 'primary' : 'white'"
+              style="font-family: Inter;"
             >
-              <p>{{ data.dia }}</p>
-              <p style="font-size: 14px;">{{ data.abrev }}</p>
-            </span>
-          </v-card>
-        </v-item>
-      </v-item-group>
-    </v-card>
+              <span
+                class="text-center"
+                style="line-height: 100%;"
+                :style="{ color: isSelected ? 'white' : '#464646' }"
+              >
+                <p>{{ data.dia }}</p>
+                <p style="font-size: 14px;">{{ data.diaSemana }}</p>
+              </span>
+            </v-card>
+          </v-item>
+        </v-item-group>
+      </v-card>
 
     <!-- FILTROS -->
     <v-card
@@ -90,79 +93,126 @@
 
     <!-- HORÁRIOS (OCUPA O RESTO + SCROLL) -->
     <v-card
-      class="flex-grow-1"
       flat tile
       rounded="0"
-      height="600"
+      style="height: calc(100dvh - 268px);overflow-y: auto;"
       color="#d0d0d0"
-      style="overflow: auto;"
-    >
+      >
       <v-item-group
         multiple
         v-model="horaSelected"
-        class="px-2 py-2 mb-16 d-flex flex-column scroll-y"
+        style="overflow-y: auto; margin-bottom: 120px;"
+        heigh
+        class="px-2 py-2 d-flex flex-column scroll-y"
       >
         <v-item
-          v-for="hora in horarios"
-          :key="hora.hora"
-          v-slot="{ isSelected, toggle }"
-        >
-          <v-card
-            @click="toggle"
-            height="60"
-            flat
-            class="mx-1 my-2 d-flex justify-center align-center"
-            :color="isSelected ? 'primary' : hora.disabled ? 'grey' : 'white'"
-            style="font-family: Inter;"
-          >
-            {{ hora.hora }}
-          </v-card>
-        </v-item>
+  v-for="hora in horarios"
+  :key="hora.hora"
+>
+  <v-card
+    @click="selecionarHorario(hora)"
+    height="60"
+    flat
+    class="mx-1 my-2 d-flex justify-center align-center"
+    :color="horaSelected.includes(hora.valor) ? 'primary' : 'white'"
+    style="font-family: Inter;"
+  >
+    {{ hora.hora }}
+  </v-card>
+</v-item>
       </v-item-group>
     </v-card>
-
   </v-container>
 </template>
 
 
 <script setup>
+import { useAppStore } from '@/stores/app'
+
     const quadra = ref('Quadra 1')
     const esporte = ref('Vôlei')
     const dateSelected = ref(0)
-    const horaSelected = ref([])
-    const datas = ref([
-        {dia: 22, abrev: "Qui"},
-        {dia: 23, abrev: "Sex"},
-        {dia: 24, abrev: "Sab"},
-        {dia: 25, abrev: "Dom"},
-        {dia: 26, abrev: "Seg"},
-        {dia: 27, abrev: "Ter"},
-        {dia: 28, abrev: "Qua"},
-        {dia: 29, abrev: "Qui"},
-        {dia: 30, abrev: "Sex"},
+    const dataSelecionada = ref(new Date())
+    const appStore = useAppStore()
+    const datas = ref(gerarListaDeDias(30))
+    const mesAtual = ref('Janeiro')
+    const active = ref(false)
+    const meses = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril',
+    'Maio', 'Junho', 'Julho', 'Agosto',
+    'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ]
+    const cards = ref([])
+    const scrollContainer = ref(null)
+    const diaAtualKey = computed(() =>
+  dataSelecionada.value.toISOString().split('T')[0]
+)
+  const horaSelected = computed(() => {
+  return appStore.horariosSelecionados[diaAtualKey.value] || []
+})
 
-    ])
-    const horarios = computed(()=>{
-        let h = new Date().getHours()
-        return horas.value.filter((item)=>{ return item.filtro > h})
-    }) 
+    function gerarListaDeDias(qtdDias = 30) {
+      const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+  const hoje = new Date()
+  const lista = []
+
+  for (let i = 0; i < qtdDias; i++) {
+    const data = new Date(hoje)
+    data.setDate(hoje.getDate() + i)
+
+    lista.push({
+  date: data,
+  diaSemana: diasSemana[data.getDay()],
+  dia: data.getDate(),
+  mes: data.getMonth(),
+  ano: data.getFullYear(),
+})
+  }
+  return lista
+}
+function mudarDia(data) {
+  dataSelecionada.value = data.date
+}
+function selecionarHorario(hora) {
+  appStore.toggleHorario(dataSelecionada.value, hora.valor)
+  
+}
+function atualizarMesVisivel() {
+  const containerLeft = scrollContainer.value.$el.scrollLeft
+  console.log(containerLeft)
+  cards.value.forEach((card)=>{
+    let el = {left: card.$el.offsetLeft - (card.$el.offsetWidth / 2), month: card.$el.dataset.month }
+    if(el.left < containerLeft && meses[el.month] !== mesAtual.value){
+      console.log(el)
+      mesAtual.value = meses[el.month]
+    }})
+}
+
+const horarios = computed(() => {
+  const agora = new Date()
+  const horaAtual = agora.getHours()
+  const ehHoje = dataSelecionada.value.toDateString() === agora.toDateString()
+  console.log(ehHoje)
+  return horas.value.filter(
+    item => !ehHoje || item.valor > horaAtual
+  )
+})
     const horas = ref([
-        {hora: "08h - 09h", filtro: "08"},
-        {hora: "09h - 10h", filtro: "09"},
-        {hora: "10h - 11h",filtro: "10"},
-        {hora: "11h - 12h",filtro: "11"},
-        {hora: "13h - 14h",filtro: "13"},
-        {hora: "14h - 15h",filtro: "14", disabled: true},
-        {hora: "15h - 16h",filtro: "15", disabled: true},
-        {hora: "16h - 17h",filtro: "16"},
-        {hora: "17h - 18h",filtro: "17", disabled: true},
-        {hora: "18h - 19h",filtro: "18", disabled: true},
-        {hora: "19h - 20h",filtro: "19", disabled: true},
-        {hora: "20h - 21h",filtro: "20"},
-        {hora: "21h - 22h",filtro: "21"},
-        {hora: "22h - 23h",filtro: "22"},
-
-    ])
+  { hora: "08h - 09h", valor: 8 },
+  { hora: "09h - 10h", valor: 9 },
+  { hora: "10h - 11h", valor: 10 },
+  { hora: "11h - 12h", valor: 11 },
+  { hora: "13h - 14h", valor: 13 },
+  { hora: "14h - 15h", valor: 14 },
+  { hora: "15h - 16h", valor: 15 },
+  { hora: "16h - 17h", valor: 16 },
+  { hora: "17h - 18h", valor: 17 },
+  { hora: "18h - 19h", valor: 18 },
+  { hora: "19h - 20h", valor: 19 },
+  { hora: "20h - 21h", valor: 20 },
+  { hora: "21h - 22h", valor: 21 },
+  { hora: "22h - 23h", valor: 22 },
+])
   const items = [
     'https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg',
     'https://cdn.vuetifyjs.com/images/carousel/sky.jpg',
@@ -207,6 +257,9 @@
   overflow-y: auto;
   flex-grow: 1;
   -webkit-overflow-scrolling: touch;
+}
+.bgBottom{
+  background-color: rgb(240, 240, 240) !important;
 }
 
 </style>
