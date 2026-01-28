@@ -3,6 +3,39 @@
     class="px-0 py-0 d-flex flex-column"
     max-width="900"
   >
+  <v-dialog
+      v-model="maisdatasModal"
+      class="d-flex align-start"
+    >
+      <v-card class="d-flex align-center pa-5" width="100%"
+      >
+      <v-card-title>Selecione a data</v-card-title>
+      <v-card-text>
+
+        <v-date-picker theme="light"
+        class="weekdays-primary"
+        weekday-format="short"
+        v-model="dataSelecionada"
+        @update:model-value="maisdatasModal = false"
+        :min="hoje"
+  :max="diaMaximo"
+  lang="pt-BR"
+        hide-header
+        >
+        <template v-slot:controls="{ disabled, nextMonth, prevMonth, monthYearText }">
+          <v-btn :disabled="disabled.includes('prev-month')" color="primary" icon="$prev" @click="prevMonth "></v-btn>
+          <v-spacer></v-spacer>
+          <div class="text-center">
+            <div class="text-caption my-n1 text-primary">{{ monthYearText.split(' ')[1] }}</div>
+            <div class="text-body-1">{{ monthYearText.split(' ')[0] }}</div>
+          </div>
+          <v-spacer></v-spacer>
+          <v-btn :disabled="disabled.includes('next-month')" color="primary" icon="$next" @click="nextMonth"></v-btn>
+        </template>
+      </v-date-picker>
+    </v-card-text>
+      </v-card>
+    </v-dialog>
 
     <!-- HEADER -->
       <v-card
@@ -16,93 +49,99 @@
           {{ mesAtual }}
         </v-card-subtitle>
 
-        <v-card-subtitle class="pa-4" style="color: #5B8BD3;">
+        <v-card-subtitle @click="abrirDatasModal" class="pa-4" style="color: #5B8BD3;">
           Mais datas
         </v-card-subtitle>
       </v-card>
 
       <!-- DATAS (SCROLL HORIZONTAL) -->
       <v-card flat height="74" color="white" tile>
-        <v-item-group
-          mandatory
-          v-model="dateSelected"
-           ref="scrollContainer"
-  class="px-2 py-3 d-flex scroll-x"
-  @scroll="atualizarMesVisivel"
-        >
-          <v-item
-            v-for="data in datas"
-            :key="data.dia"
-            v-slot="{ isSelected, toggle }"
-          >
-            <v-card
-              @click="()=>{toggle(), mudarDia(data)}"
-              width="50"
-              height="50"
-              flat
-              :data-month="data.mes"
-              rounded="xl"
-              ref="cards"
-              class="mx-1 d-flex flex-column justify-center align-center flex-shrink-0"
-              :color="isSelected ? 'primary' : 'white'"
-              style="font-family: Inter;"
-            >
-              <span
-                class="text-center"
-                style="line-height: 100%;"
-                :style="{ color: isSelected ? 'white' : '#464646' }"
-              >
-                <p>{{ data.dia }}</p>
-                <p style="font-size: 14px;">{{ data.diaSemana }}</p>
-              </span>
-            </v-card>
-          </v-item>
-        </v-item-group>
-      </v-card>
+  <div
+    ref="scrollContainer"
+    class="px-2 py-3 d-flex scroll-x"
+    @scroll="atualizarMesVisivel"
+  >
+    <v-card
+      v-for="data in datas"
+      :key="data.date.toISOString()"
+      width="50"
+      height="50"
+      flat
+      ref="cards"
+      :data-month="data.mes"
+      rounded="xl"
+      class="mx-1 d-flex flex-column justify-center align-center flex-shrink-0"
+      :color="isDiaSelecionado(data.date) ? 'primary' : 'white'"
+      @click="selecionarDia(data.date)"
+      style="font-family: Inter; cursor: pointer;"
+    >
+      <span
+        class="text-center"
+        :style="{ color: isDiaSelecionado(data.date) ? 'white' : '#464646' }"
+      >
+        <p>{{ data.dia }}</p>
+        <p style="font-size: 14px;margin-top: -4px;">{{ data.diaSemana }}</p>
+      </span>
+    </v-card>
+  </div>
+</v-card>
 
     <!-- FILTROS -->
     <v-card
       class="d-flex justify-center align-center px-6"
       flat tile
-      height="80"
+      height="65"
       color="#e6e6e6"
     >
-      <v-select
-        v-model="esporte"
-        width="120"
-        label="Esporte"
-        disabled
-        class="mr-4"
-        hide-details
-        variant="outlined"
-        density="compact"
-        :items="['Vôlei']"
-      />
+    <v-select
+    v-model="esporte"
+    width="120"
+    label="Esporte"
+    disabled
+    class="mr-4"
+    hide-details
+    variant="outlined"
+    density="compact"
+    :items="['Vôlei']"
+    />
+    
+    <v-select
+    v-model="quadra"
+    width="180"
+    label="Quadra"
+    disabled
+    hide-details
+    variant="outlined"
+    density="compact"
+    :items="['Quadra 1']"
+    />
+  </v-card>
+  <v-card
+  class="d-flex justify-center align-center px-6"
+  tile
+  height="35"
+  variant="elevated"
+  color="primary"
+  >
+  <v-card-text class="text-center">
 
-      <v-select
-        v-model="quadra"
-        width="180"
-        label="Quadra"
-        disabled
-        hide-details
-        variant="outlined"
-        density="compact"
-        :items="['Quadra 1']"
-      />
-    </v-card>
-
-    <!-- HORÁRIOS (OCUPA O RESTO + SCROLL) -->
-    <v-card
+    {{ dataSelecionada.getUTCDate() }} de
+    {{ meses[dataSelecionada.getMonth()] }} de
+    {{ dataSelecionada.getFullYear() }}, {{ diasSemanaCompleto[dataSelecionada.getDay()] }} 
+  </v-card-text>
+</v-card>
+  
+  <!-- HORÁRIOS (OCUPA O RESTO + SCROLL) -->
+  <v-card
       flat tile
       rounded="0"
-      style="height: calc(100dvh - 268px);overflow-y: auto;"
+      style="height: calc(100dvh - 288px);overflow-y: auto;"
       color="#d0d0d0"
       >
       <v-item-group
         multiple
         v-model="horaSelected"
-        style="overflow-y: auto; margin-bottom: 120px;"
-        heigh
+        style="overflow-y: auto; margin-bottom: 140px;"
         class="px-2 py-2 d-flex flex-column scroll-y"
       >
         <v-item
@@ -114,7 +153,7 @@
     height="60"
     flat
     class="mx-1 my-2 d-flex justify-center align-center"
-    :color="horaSelected.includes(hora.valor) ? 'primary' : 'white'"
+    :color="horaSelected.includes(hora.valor) ? 'success' : 'white'"
     style="font-family: Inter;"
   >
     {{ hora.hora }}
@@ -131,12 +170,13 @@ import { useAppStore } from '@/stores/app'
 
     const quadra = ref('Quadra 1')
     const esporte = ref('Vôlei')
-    const dateSelected = ref(0)
     const dataSelecionada = ref(new Date())
     const appStore = useAppStore()
-    const datas = ref(gerarListaDeDias(30))
+    const datas = computed(() => gerarListaDeDias(30))
     const mesAtual = ref('Janeiro')
-    const active = ref(false)
+    const maisdatasModal = ref(false)
+    const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+    const diasSemanaCompleto = ['Domingo', 'Segunda - feira', 'Terça - feira', 'Quarta - feira', 'Quinta - feira', 'Sexta - feira', 'Sábado']
     const meses = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril',
     'Maio', 'Junho', 'Julho', 'Agosto',
@@ -144,15 +184,42 @@ import { useAppStore } from '@/stores/app'
     ]
     const cards = ref([])
     const scrollContainer = ref(null)
-    const diaAtualKey = computed(() =>
-  dataSelecionada.value.toISOString().split('T')[0]
+
+   const diaSelecionadoKey = computed(() =>
+  formatDateLocal(dataSelecionada.value)
 )
+   const hoje = computed(() => {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return d
+})
+function diaTemHorario(date) {
+  const key = formatDateLocal(date)
+  const horarios = appStore.horariosSelecionados[key]
+  return Array.isArray(horarios) && horarios.length > 0
+}
+const diaMaximo = computed(() => {
+  const d = new Date()
+  d.setDate(d.getDate() + 45)
+  d.setHours(23, 59, 59, 999)
+  return d
+})
+function selecionarDia(date) {
+  const d = new Date(date)
+  d.setHours(0, 0, 0, 0)
+  dataSelecionada.value = d
+}
+
+function isDiaSelecionado(date) {
+  return (
+    date.toDateString() === dataSelecionada.value.toDateString()
+  )
+}
   const horaSelected = computed(() => {
-  return appStore.horariosSelecionados[diaAtualKey.value] || []
+  return appStore.horariosSelecionados[diaSelecionadoKey.value] || []
 })
 
     function gerarListaDeDias(qtdDias = 30) {
-      const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
   const hoje = new Date()
   const lista = []
 
@@ -173,17 +240,27 @@ import { useAppStore } from '@/stores/app'
 function mudarDia(data) {
   dataSelecionada.value = data.date
 }
+function abrirDatasModal() {
+  maisdatasModal.value = true
+}
 function selecionarHorario(hora) {
   appStore.toggleHorario(dataSelecionada.value, hora.valor)
   
 }
+function formatDateLocal(date) {
+  const d = new Date(date)
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
 function atualizarMesVisivel() {
-  const containerLeft = scrollContainer.value.$el.scrollLeft
+  const containerLeft = scrollContainer.value.scrollLeft
   console.log(containerLeft)
+  console.log(cards.value[8])
   cards.value.forEach((card)=>{
     let el = {left: card.$el.offsetLeft - (card.$el.offsetWidth / 2), month: card.$el.dataset.month }
     if(el.left < containerLeft && meses[el.month] !== mesAtual.value){
-      console.log(el)
       mesAtual.value = meses[el.month]
     }})
 }

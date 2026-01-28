@@ -2,8 +2,9 @@
   <v-container
     class="px-0 pt-0 d-flex flex-column"
     max-width="900"
-    style="height: 100%;"
   >
+  <v-sheet style="height: calc(100dvh); overflow-y: auto;" color="white">
+
     <v-card
         class="d-flex align-center justify-space-between"
         flat
@@ -36,7 +37,7 @@
                         <span>{{ item.data }}</span>
                     </v-col>
                     <v-col cols="4">
-                        <span>{{ item.horario.start }}h - {{ item.horario.end }}h</span>
+                        <!-- <span>{{ item.horario.start }}h - {{ item.horario.end }}h</span> -->
                     </v-col>
                     <v-col cols="4" class="d-flex justify-end pr-5">
                         <span :class="historico.situacao">{{ historico.situacao }}</span>
@@ -58,7 +59,8 @@
     
         </v-card-text>
       </v-card>
- 
+  </v-sheet>
+      
 
   </v-container>
 </template>
@@ -69,12 +71,17 @@
         [
             {op: 0,situacao: 'Pendente', lista: [
                 {
-                    data: "27/01/2026",
+                    data: "27/01",
                     horario: {start: 18, end: 20},
                     quadra: "01",
                 }
             ]},
             {op: 1,situacao: 'Pago', lista: [
+                {
+                    data: "27/01/2026",
+                    horario: {start: 18, end: 20},
+                    quadra: "01",
+                },
                 {
                     data: "27/01/2026",
                     horario: {start: 18, end: 20},
