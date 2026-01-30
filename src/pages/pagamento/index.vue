@@ -4,7 +4,28 @@
     max-width="900"
     style="height: calc(100dvh - 132px); overflow-y: auto;"
   >
-    <v-card-title class="mt-3"> <v-btn icon="mdi-chevron-left" @click="route.back()" variant="text" elevation="2" size="40" color="primary" class="mr-10"></v-btn>Forma de pagamento</v-card-title>
+  <v-card-title class="mt-3"> <v-btn icon="mdi-chevron-left" @click="router.back()" variant="text" elevation="2" size="40" color="primary" class="mr-10"></v-btn>Horários selecionados</v-card-title>
+    <v-card class="mt-4" flat>
+        <v-card-text>
+            <v-expansion-panels color="white">
+            <v-expansion-panel v-for="item in useAppStore().horariosSelecionados" style="color: #616161;">
+            <v-expansion-panel-title>
+                <v-row>
+                    <v-col cols="4">
+                        <span>{{ Object.keys(useAppStore().horariosSelecionados[0]) }}</span>
+                    </v-col>
+                    <v-col cols="4">
+                        <!-- <span>{{ item.horario.start }}h - {{ item.horario.end }}h</span> -->
+                    </v-col>
+                    <v-col cols="4" class="d-flex justify-end pr-5">
+                    </v-col>
+                </v-row>
+            </v-expansion-panel-title>
+            </v-expansion-panel>
+        </v-expansion-panels>
+        </v-card-text>
+    </v-card>
+    <!-- <v-card-title class="mt-3"> <v-btn icon="mdi-chevron-left" @click="router.back()" variant="text" elevation="2" size="40" color="primary" class="mr-10"></v-btn>Forma de pagamento</v-card-title>
     <v-card class="mt-4" flat>
         <v-card-text>
             <v-list lines="two" class="px-2">
@@ -38,7 +59,7 @@
       </v-list-item>
             </v-list>
         </v-card-text>
-    </v-card>
+    </v-card> -->
  
 
   </v-container>
@@ -46,6 +67,9 @@
 
 
 <script setup>
+import router from '@/router';
+import { useAppStore } from '@/stores/app';
+
     const historicos = ref(
         [
             {op: 0,situacao: 'Pendente', lista: [

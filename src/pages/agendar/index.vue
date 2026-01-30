@@ -70,7 +70,9 @@
       ref="cards"
       :data-month="data.mes"
       rounded="xl"
+      :style="{border: diaTemHorario(data.date) ? '2px #4caf50 solid' : 'none' }"
       class="mx-1 d-flex flex-column justify-center align-center flex-shrink-0"
+      border=""
       :color="isDiaSelecionado(data.date) ? 'primary' : 'white'"
       @click="selecionarDia(data.date)"
       style="font-family: Inter; cursor: pointer;"
@@ -127,7 +129,7 @@
 
     {{ dataSelecionada.getUTCDate() }} de
     {{ meses[dataSelecionada.getMonth()] }} de
-    {{ dataSelecionada.getFullYear() }}, {{ diasSemanaCompleto[dataSelecionada.getDay()] }} 
+    {{ dataSelecionada.getFullYear() }}, {{ diasSemana[dataSelecionada.getDay()] }} 
   </v-card-text>
 </v-card>
   
@@ -172,7 +174,7 @@ import { useAppStore } from '@/stores/app'
     const esporte = ref('Vôlei')
     const dataSelecionada = ref(new Date())
     const appStore = useAppStore()
-    const datas = computed(() => gerarListaDeDias(30))
+    const datas = computed(() => gerarListaDeDias(46))
     const mesAtual = ref('Janeiro')
     const maisdatasModal = ref(false)
     const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
@@ -195,8 +197,8 @@ import { useAppStore } from '@/stores/app'
 })
 function diaTemHorario(date) {
   const key = formatDateLocal(date)
-  const horarios = appStore.horariosSelecionados[key]
-  return Array.isArray(horarios) && horarios.length > 0
+  const diaMarcado = Object.hasOwn(appStore.horariosSelecionados, key)
+  return diaMarcado
 }
 const diaMaximo = computed(() => {
   const d = new Date()

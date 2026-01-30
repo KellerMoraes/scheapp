@@ -15,13 +15,15 @@ export const useAppStore = defineStore('app', () => {
     if (!horariosSelecionados.value[key]) {
       horariosSelecionados.value[key] = []
     }
-
     const lista = horariosSelecionados.value[key]
     const index = lista.indexOf(valor)
 
     if (index === -1) lista.push(valor)
-    else lista.splice(index, 1)
-  console.log(horariosSelecionados.value)
+    else { lista.splice(index, 1)
+  if(lista.length == 0){
+        delete horariosSelecionados.value[key]
+      }
+    }
   }
 
   function limparDia(date) {
